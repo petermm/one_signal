@@ -1,7 +1,7 @@
 defmodule OneSignal.Param do
   alias OneSignal.Param
 
-  defstruct messages: %{}, headings: nil, platforms: nil, included_segments: nil, excluded_segments: nil, include_player_ids: nil, exclude_player_ids: nil, tags: nil, data: nil, ios_params: nil, android_params: nil, adm_params: nil, wp_params: nil, chrome_params: nil, firefox_params: nil, send_after: nil, filters: nil
+  defstruct messages: %{}, headings: nil, platforms: nil, included_segments: nil, excluded_segments: nil, include_player_ids: nil, exclude_player_ids: nil, tags: nil, data: nil, ios_params: nil, android_params: nil, adm_params: nil, wp_params: nil, chrome_params: nil, firefox_params: nil, send_after: nil, filters: nil, extra: %{}
 
   defp to_string_key({k, v}) do
     {to_string(k), v}
@@ -38,6 +38,7 @@ defmodule OneSignal.Param do
                      :chrome_params, :firefox_params]
     optionals = param
                 |> Map.from_struct
+                |> Map.merge(param.extra)
                 |> Enum.reject(fn {k, v} ->
                     k in reject_params or is_nil(v)
                 end)
@@ -196,5 +197,7 @@ defmodule OneSignal.Param do
     %{param | filters: [filter | filters]}
   end
 
-
+  def put_extra(%Param{} = param, key, value) do
+    %{param | extra: Map.put(param.extra, key, value) }
+  end
 end

@@ -73,12 +73,14 @@ defmodule OneSignal.ParamTest do
             |> put_message(:ja, "はろー")
             |> exclude_segment("Free Players")
             |> exclude_segment("New Players")
+            |> put_extra(:small_icon, "icon")
             |> build
 
     assert param["contents"]
-    assert param["app_id"]
+    # assert param["app_id"]
     assert param["headings"]
     assert param["excluded_segments"]
+    assert param["small_icon"] == "icon"
   end
 
   test "push notification" do
@@ -117,4 +119,10 @@ defmodule OneSignal.ParamTest do
     assert param.filters == [filter]
   end
 
+  test "put extra" do
+    value = "icon"
+    param = put_extra(OneSignal.new, :small_icon, value)
+    refute Enum.empty?(param.extra)
+    assert param.extra.small_icon == value
+  end
 end
