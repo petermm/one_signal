@@ -187,6 +187,13 @@ defmodule OneSignal.Param do
   end
 
   @doc """
+  Put ios_attachments "id1", "https://domain.com/image.jpg"
+  """
+  def put_ios_attachments(%Param{} = param, key, value) do
+    %{param | ios_attachments: %{key => value}}
+  end
+
+  @doc """
   Put filter
   """
   def put_filter(%Param{filters: nil} = param, %{} = filter) do
