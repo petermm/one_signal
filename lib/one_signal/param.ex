@@ -21,7 +21,8 @@ defmodule OneSignal.Param do
             extra: %{},
             ios_attachments: nil,
             include_ios_tokens: nil,
-            include_android_reg_ids: nil
+            include_android_reg_ids: nil,
+            buttons: nil
 
   defp to_string_key({k, v}) do
     {to_string(k), v}
