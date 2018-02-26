@@ -1,18 +1,41 @@
 defmodule OneSignal.Param do
   alias OneSignal.Param
 
-  defstruct messages: %{}, headings: nil, platforms: nil, included_segments: nil, excluded_segments: nil, include_player_ids: nil, exclude_player_ids: nil, tags: nil, data: nil, ios_params: nil, android_params: nil, adm_params: nil, wp_params: nil, chrome_params: nil, firefox_params: nil, send_after: nil, filters: nil, extra: %{}, ios_attachments: nil
+  defstruct messages: %{},
+            headings: nil,
+            platforms: nil,
+            included_segments: nil,
+            excluded_segments: nil,
+            include_player_ids: nil,
+            exclude_player_ids: nil,
+            tags: nil,
+            data: nil,
+            ios_params: nil,
+            android_params: nil,
+            adm_params: nil,
+            wp_params: nil,
+            chrome_params: nil,
+            firefox_params: nil,
+            send_after: nil,
+            filters: nil,
+            extra: %{},
+            ios_attachments: nil,
+            include_ios_tokens: nil,
+            include_android_reg_ids: nil
 
   defp to_string_key({k, v}) do
     {to_string(k), v}
   end
 
   defp to_body({:headings, headings}) do
-    body = headings
-            |> Enum.map(&to_string_key/1)
-            |> Enum.into(%{})
+    body =
+      headings
+      |> Enum.map(&to_string_key/1)
+      |> Enum.into(%{})
+
     {:headings, body}
   end
+
   defp to_body(body), do: body
 
   @doc """
@@ -21,7 +44,7 @@ defmodule OneSignal.Param do
   def notify(%Param{} = param) do
     param
     |> build
-    |> OneSignal.Notification.send
+    |> OneSignal.Notification.send()
   end
 
   @doc """
@@ -29,22 +52,31 @@ defmodule OneSignal.Param do
   """
   def build(%Param{} = param) do
     required = %{
-      "app_id"   => OneSignal.fetch_app_id,
+      "app_id" => OneSignal.fetch_app_id(),
       "contents" => Enum.map(param.messages, &to_string_key/1) |> Enum.into(%{})
     }
 
-    reject_params = [:messages, :platforms, :ios_params,
-                     :android_params, :adm_params, :wp_params,
-                     :chrome_params, :firefox_params]
-    optionals = param
-                |> Map.from_struct
-                |> Map.merge(param.extra)
-                |> Enum.reject(fn {k, v} ->
-                    k in reject_params or is_nil(v)
-                end)
-                |> Enum.map(&to_body/1)
-                |> Enum.map(&to_string_key/1)
-                |> Enum.into(%{})
+    reject_params = [
+      :messages,
+      :platforms,
+      :ios_params,
+      :android_params,
+      :adm_params,
+      :wp_params,
+      :chrome_params,
+      :firefox_params
+    ]
+
+    optionals =
+      param
+      |> Map.from_struct()
+      |> Map.merge(param.extra)
+      |> Enum.reject(fn {k, v} ->
+        k in reject_params or is_nil(v)
+      end)
+      |> Enum.map(&to_body/1)
+      |> Enum.map(&to_string_key/1)
+      |> Enum.into(%{})
 
     Map.merge(required, optionals)
   end
@@ -59,6 +91,7 @@ defmodule OneSignal.Param do
   def put_message(%Param{} = param, message) do
     put_message(param, :en, message)
   end
+
   def put_message(%Param{} = param, language, message) do
     messages = Map.put(param.messages, language, message)
     %{param | messages: messages}
@@ -75,9 +108,11 @@ defmodule OneSignal.Param do
   def put_heading(%Param{} = param, heading) do
     put_heading(param, :en, heading)
   end
+
   def put_heading(%Param{headings: nil} = param, language, heading) do
     %{param | headings: %{language => heading}}
   end
+
   def put_heading(%Param{headings: headings} = param, language, heading) do
     headings = Map.put(headings, language, heading)
     %{param | headings: headings}
@@ -93,8 +128,9 @@ defmodule OneSignal.Param do
   def put_segment(%Param{included_segments: nil} = param, segment) do
     %{param | included_segments: [segment]}
   end
+
   def put_segment(%Param{included_segments: seg} = param, segment) do
-    %{param | included_segments: [segment|seg]}
+    %{param | included_segments: [segment | seg]}
   end
 
   @doc """
@@ -114,6 +150,7 @@ defmodule OneSignal.Param do
   def drop_segment(%Param{included_segments: nil} = param, _seg) do
     param
   end
+
   def drop_segment(%Param{} = param, seg) do
     segs = Enum.reject(param.included_segments, &(&1 == seg))
     %{param | included_segments: segs}
@@ -132,8 +169,9 @@ defmodule OneSignal.Param do
   def exclude_segment(%Param{excluded_segments: nil} = param, seg) do
     %{param | excluded_segments: [seg]}
   end
+
   def exclude_segment(%Param{excluded_segments: segs} = param, seg) do
-    %{param | excluded_segments: [seg|segs]}
+    %{param | excluded_segments: [seg | segs]}
   end
 
   @doc """
@@ -149,8 +187,9 @@ defmodule OneSignal.Param do
   def put_player_id(%Param{include_player_ids: nil} = param, player_id) do
     %{param | include_player_ids: [player_id]}
   end
+
   def put_player_id(%Param{include_player_ids: ids} = param, player_id) do
-    %{param | include_player_ids: [player_id|ids]}
+    %{param | include_player_ids: [player_id | ids]}
   end
 
   def put_player_ids(%Param{} = param, player_ids) when is_list(player_ids) do
@@ -165,8 +204,9 @@ defmodule OneSignal.Param do
   def exclude_player_id(%Param{exclude_player_ids: nil} = param, player_id) do
     %{param | exclude_player_ids: [player_id]}
   end
+
   def exclude_player_id(%Param{exclude_player_ids: ids} = param, player_id) do
-    %{param | exclude_player_ids: [player_id|ids]}
+    %{param | exclude_player_ids: [player_id | ids]}
   end
 
   def exclude_player_ids(%Param{} = param, player_ids) when is_list(player_ids) do
@@ -194,6 +234,40 @@ defmodule OneSignal.Param do
   end
 
   @doc """
+  put_ios_tokens
+  """
+  def put_ios_tokens(%Param{include_player_ids: nil} = param, player_id) do
+    %{param | include_ios_tokens: [player_id]}
+  end
+
+  def put_ios_tokens(%Param{include_player_ids: ids} = param, player_id) do
+    %{param | include_ios_tokens: [player_id | ids]}
+  end
+
+  def put_ios_tokens(%Param{} = param, player_ids) when is_list(player_ids) do
+    Enum.reduce(player_ids, param, fn next, acc ->
+      put_ios_tokens(acc, next)
+    end)
+  end
+
+  @doc """
+  put_android_reg_ids
+  """
+  def put_android_reg_ids(%Param{include_player_ids: nil} = param, player_id) do
+    %{param | include_android_reg_ids: [player_id]}
+  end
+
+  def put_android_reg_ids(%Param{include_player_ids: ids} = param, player_id) do
+    %{param | include_android_reg_ids: [player_id | ids]}
+  end
+
+  def put_android_reg_ids(%Param{} = param, player_ids) when is_list(player_ids) do
+    Enum.reduce(player_ids, param, fn next, acc ->
+      put_android_reg_ids(acc, next)
+    end)
+  end
+
+  @doc """
   Put filter
   """
   def put_filter(%Param{filters: nil} = param, %{} = filter) do
@@ -205,6 +279,6 @@ defmodule OneSignal.Param do
   end
 
   def put_extra(%Param{} = param, key, value) do
-    %{param | extra: Map.put(param.extra, key, value) }
+    %{param | extra: Map.put(param.extra, key, value)}
   end
 end
