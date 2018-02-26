@@ -268,6 +268,23 @@ defmodule OneSignal.Param do
   end
 
   @doc """
+  put_button
+  """
+  def put_button(%Param{buttons: nil} = param, button) do
+    %{param | buttons: [button]}
+  end
+
+  def put_button(%Param{buttons: buttons} = param, button) do
+    %{param | buttons: [button | buttons]}
+  end
+
+  def put_button(%Param{} = param, button) when is_list(button) do
+    Enum.reduce(button, param, fn next, acc ->
+      put_button(acc, next)
+    end)
+  end
+
+  @doc """
   Put filter
   """
   def put_filter(%Param{filters: nil} = param, %{} = filter) do
