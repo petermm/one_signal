@@ -32,7 +32,7 @@ defmodule OneSignal.Mixfile do
   defp deps do
     [
       {:poison, "~> 3.1"},
-      {:httpoison, "~> 0.13.0"},
+      {:httpoison, "~> 1.0"},
       {:ex_doc, "~> 0.8.0", only: :docs}
     ]
   end
